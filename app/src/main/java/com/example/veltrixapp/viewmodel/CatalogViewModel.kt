@@ -1,43 +1,42 @@
 package com.example.veltrixapp.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.veltrixapp.model.Shoe
+import androidx.lifecycle.viewModelScope
+import com.example.veltrixapp.data.ProductoDTO
+import com.example.veltrixapp.data.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class CatalogViewModel : ViewModel() {
 
-    // Estado interno inmutable para la vista, mutable internamente
-    private val _shoes = MutableStateFlow<List<Shoe>>(emptyList())
-    val shoes: StateFlow<List<Shoe>> = _shoes.asStateFlow()
+    // Se define el estado interno para la lista de productos provenientes de la API
+    private val _productos = MutableStateFlow<List<ProductoDTO>>(emptyList())
+    val productos: StateFlow<List<ProductoDTO>> = _productos.asStateFlow()
 
-    private val _cart = MutableStateFlow<List<Shoe>>(emptyList())
-    val cart: StateFlow<List<Shoe>> = _cart.asStateFlow()
+    // Se define un estado para manejar errores de red o servidor
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        loadMockData()
+        cargarProductos()
     }
 
     /**
-     * Simula la carga de datos del backend.
-     * Aquí integraremos Retrofit para consumir la API de Spring Boot posteriormente.
+     * Se obtienen los productos reales desde el backend mediante Retrofit.
      */
-    private fun loadMockData() {
-        _shoes.value = listOf(
-            Shoe(1, "Nike Air Max", "Hombre", 120.0),
-            Shoe(2, "Adidas Ultraboost", "Mujer", 150.0),
-            Shoe(3, "Puma RS-X", "Unisex", 90.0),
-            Shoe(4, "Vans Old Skool", "Unisex", 75.0)
-        )
-    }
-
-    /**
-     * Agrega un zapato al estado global del carrito.
-     */
-    fun addToCart(shoe: Shoe) {
-        val currentCart = _cart.value.toMutableList()
-        currentCart.add(shoe)
-        _cart.value = currentCart
+    private fun cargarProductos() {
+        viewModelScope.launch {
+            try {
+                // Se realiza la petición HTTP al endpoint /api/productos definido en VeltrixApiService
+                val listaBackend = RetrofitClient.apiService.obtenerProductos()
+                _productos.value = listaBackend
+                _error.value = null
+            } catch (e: Exception) {
+                // Se captura cualquier error de conexión o parseo para evitar que la app colapse
+                _error.value = "Error de conexión: ${e.message}"
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 // Interceptor para ver las peticiones en el Logcat (muy útil para debug)
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    val roomVersion = "2.6.1"
+    val roomVersion = "2.8.5"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion") // Para usar corrutinas
     kapt("androidx.room:room-compiler:$roomVersion")
