@@ -1,5 +1,7 @@
 package com.example.veltrixapp.ui.screens
 
+import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -22,7 +25,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.veltrixapp.R
 import com.example.veltrixapp.viewmodel.CartViewModel
 import com.example.veltrixapp.viewmodel.CatalogViewModel
 
@@ -32,9 +39,10 @@ fun CatalogScreen(
     catalogViewModel: CatalogViewModel,
     cartViewModel: CartViewModel
 ) {
-    // Se observa el estado de los productos provenientes de la API
-    // Nota: Asegurar que 'productos' sea el nombre de la variable expuesta en CatalogViewModel
     val productosLista by catalogViewModel.productos.collectAsState()
+
+    // Se obtiene el contexto para la resolución dinámica de imágenes
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -43,7 +51,6 @@ fun CatalogScreen(
             )
         }
     ) { paddingValues ->
-        // Se muestra la lista de productos utilizando LazyColumn para optimizar la memoria
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -53,11 +60,10 @@ fun CatalogScreen(
         ) {
             items(productosLista) { producto ->
                 ProductCard(
-                    // Se asume que el modelo de datos de Retrofit tiene id, nombre y precio
                     nombre = producto.nombre,
                     precio = producto.precio,
+                    context = context,
                     onAddToCart = {
-                        // Se delega el guardado local a Room mediante el CartViewModel
                         cartViewModel.addProduct(
                             id = producto.id,
                             nombre = producto.nombre,
@@ -74,8 +80,12 @@ fun CatalogScreen(
 fun ProductCard(
     nombre: String,
     precio: Double,
+    context: Context,
     onAddToCart: () -> Unit
 ) {
+    // Se calcula el recurso de la imagen en tiempo real
+    val imageResId = getDrawableIdFromName(context, nombre)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -87,8 +97,17 @@ fun ProductCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Se inserta la imagen del producto
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = "Imagen de $nombre",
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(end = 16.dp),
+                contentScale = ContentScale.Crop
+            )
+
             Column(modifier = Modifier.weight(1f)) {
-                // Se renderiza el nombre y el precio del producto
                 Text(
                     text = nombre,
                     style = MaterialTheme.typography.titleMedium
@@ -104,4 +123,20 @@ fun ProductCard(
             }
         }
     }
+}
+
+/**
+ * Se normaliza el nombre del producto para buscarlo en la carpeta drawable.
+ * Retorna un placeholder en caso de no encontrar coincidencia.
+ */
+fun getDrawableIdFromName(context: Context, nombre: String): Int {
+    val formattedName = nombre.lowercase().replace(" ", "_").replace("-", "_")
+
+    val resourceId = context.resources.getIdentifier(
+        formattedName,
+        "drawable",
+        context.packageName
+    )
+
+    return if (resourceId != 0) resourceId else R.drawable.ic_placeholder
 }
