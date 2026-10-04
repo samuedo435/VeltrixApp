@@ -1,6 +1,7 @@
 package com.example.veltrixapp.ui.screens
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,12 +15,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,7 +49,10 @@ fun CatalogScreen(
 ) {
     val productosLista by catalogViewModel.productos.collectAsState()
 
-    // Se obtiene el contexto para la resolución dinámica de imágenes
+    // Se observa el estado del carrito para calcular la cantidad del contador
+    val cartItems by cartViewModel.cartItems.collectAsState()
+    val totalItems = cartItems.sumOf { it.cantidad }
+
     val context = LocalContext.current
 
     Scaffold(
@@ -54,12 +60,22 @@ fun CatalogScreen(
             TopAppBar(
                 title = { Text("Catálogo Veltrix") },
                 actions = {
-                    // Se agrega el botón para ir al carrito
                     IconButton(onClick = onNavigateToCart) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = "Ver Carrito"
-                        )
+                        // Se agrega el componente BadgedBox para mostrar el número de productos
+                        BadgedBox(
+                            badge = {
+                                if (totalItems > 0) {
+                                    Badge {
+                                        Text(totalItems.toString())
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = "Ver Carrito"
+                            )
+                        }
                     }
                 }
             )
@@ -83,6 +99,12 @@ fun CatalogScreen(
                             nombre = producto.nombre,
                             precio = producto.precio
                         )
+                        // Se muestra una confirmación visual en la parte inferior de la pantalla
+                        Toast.makeText(
+                            context,
+                            "${producto.nombre} agregado al carrito",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 )
             }
@@ -97,7 +119,6 @@ fun ProductCard(
     context: Context,
     onAddToCart: () -> Unit
 ) {
-    // Se calcula el recurso de la imagen en tiempo real
     val imageResId = getDrawableIdFromName(context, nombre)
 
     Card(
@@ -111,7 +132,6 @@ fun ProductCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Se inserta la imagen del producto
             Image(
                 painter = painterResource(id = imageResId),
                 contentDescription = "Imagen de $nombre",
@@ -145,12 +165,10 @@ fun ProductCard(
  */
 fun getDrawableIdFromName(context: Context, nombre: String): Int {
     val formattedName = nombre.lowercase().replace(" ", "_").replace("-", "_")
-
     val resourceId = context.resources.getIdentifier(
         formattedName,
         "drawable",
         context.packageName
     )
-
     return if (resourceId != 0) resourceId else R.drawable.ic_placeholder
 }

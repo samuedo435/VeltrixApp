@@ -10,6 +10,8 @@ import com.example.veltrixapp.local.AppDatabase
 import com.example.veltrixapp.repository.CartRepository
 import com.example.veltrixapp.ui.navigation.AppNavigation
 import com.example.veltrixapp.ui.theme.VeltrixAppTheme
+import com.example.veltrixapp.utils.SessionManager
+import com.example.veltrixapp.viewmodel.AuthViewModel
 import com.example.veltrixapp.viewmodel.CartViewModel
 import com.example.veltrixapp.viewmodel.CatalogViewModel
 
@@ -17,17 +19,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Se inicializa la base de datos de Room
+        val sessionManager = SessionManager(applicationContext)
+        val startDestination = if (sessionManager.fetchAuthToken() != null) "catalog" else "login"
+
         val database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
             "veltrix_database"
         ).build()
 
-        // Se inicializa el repositorio pasándole el DAO
         val repository = CartRepository(database.cartDao())
 
-        // Se construye el CartViewModel inyectando el repositorio
         val cartViewModel = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -35,15 +37,22 @@ class MainActivity : ComponentActivity() {
             }
         }.create(CartViewModel::class.java)
 
-        // Se instancia el CatalogViewModel que no requiere dependencias locales
+        val authViewModel = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(sessionManager) as T
+            }
+        }.create(AuthViewModel::class.java)
+
         val catalogViewModel = CatalogViewModel()
 
         setContent {
             VeltrixAppTheme {
-                // Se inicia el enrutador principal de la aplicación
                 AppNavigation(
+                    authViewModel = authViewModel,
                     catalogViewModel = catalogViewModel,
-                    cartViewModel = cartViewModel
+                    cartViewModel = cartViewModel,
+                    startDestination = startDestination
                 )
             }
         }

@@ -1,12 +1,16 @@
 package com.example.veltrixapp.ui.screens
 
+import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,6 +29,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.veltrixapp.local.CartEntity
 import com.example.veltrixapp.viewmodel.CartViewModel
@@ -35,8 +42,8 @@ fun CartScreen(
     cartViewModel: CartViewModel,
     onNavigateBack: () -> Unit
 ) {
-    // Se observa la lista de productos guardados en Room
     val cartItems by cartViewModel.cartItems.collectAsState()
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -50,25 +57,49 @@ fun CartScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(cartItems) { item ->
-                CartItemCard(
-                    item = item,
-                    onRemove = { cartViewModel.removeProduct(item) }
+        // Se evalúa si la lista está vacía para mostrar el mensaje correspondiente
+        if (cartItems.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "El carrito está vacío",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(cartItems) { item ->
+                    CartItemCard(
+                        item = item,
+                        context = context,
+                        onRemove = { cartViewModel.removeProduct(item) }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun CartItemCard(item: CartEntity, onRemove: () -> Unit) {
+fun CartItemCard(
+    item: CartEntity,
+    context: Context,
+    onRemove: () -> Unit
+) {
+    // Se obtiene el ID de la imagen utilizando la función alojada en CatalogScreen.kt
+    val imageResId = getDrawableIdFromName(context, item.nombre)
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -77,7 +108,17 @@ fun CartItemCard(item: CartEntity, onRemove: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            // Se incorpora la imagen al diseño de la tarjeta del carrito
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = "Imagen de ${item.nombre}",
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(end = 16.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(text = item.nombre, style = MaterialTheme.typography.titleMedium)
                 Text(text = "Cantidad: ${item.cantidad}", style = MaterialTheme.typography.bodyMedium)
                 Text(text = "$${item.precio * item.cantidad}", style = MaterialTheme.typography.bodyLarge)

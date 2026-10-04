@@ -5,8 +5,27 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 // --- MODELOS DE DATOS ---
-data class LoginRequest(val correo: String, val password: String)
-data class LoginResponse(val token: String)
+data class RegisterRequest(
+    val nombre: String,
+    val apellido: String,
+    val correo: String,
+    val password: String,
+    val telefono: String?,
+    val direccion: String?
+)
+
+data class RegisterResponse(
+    val mensaje: String
+)
+
+data class LoginRequest(
+    val correo: String,
+    val password: String
+)
+
+data class LoginResponse(
+    val token: String
+)
 
 data class ProductoDTO(
     val id: Long,
@@ -21,8 +40,11 @@ data class ProductoDTO(
 // --- INTERFAZ DE RETROFIT ---
 interface VeltrixApiService {
 
-    @POST("/api/auth/login")
-    suspend fun login(@Body request: LoginRequest): LoginResponse
+    @POST("api/auth/login")
+    suspend fun iniciarSesion(@Body request: LoginRequest): LoginResponse
+
+    @POST("api/auth/register")
+    suspend fun registrarUsuario(@Body request: RegisterRequest): RegisterResponse
 
     @GET("/api/productos")
     suspend fun obtenerProductos(): List<ProductoDTO>
