@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,7 +41,8 @@ import com.example.veltrixapp.viewmodel.CatalogViewModel
 @Composable
 fun CatalogScreen(
     catalogViewModel: CatalogViewModel,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    onNavigateToCart: () -> Unit
 ) {
     val productosLista by catalogViewModel.productos.collectAsState()
 
@@ -47,7 +52,16 @@ fun CatalogScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Catálogo Veltrix") }
+                title = { Text("Catálogo Veltrix") },
+                actions = {
+                    // Se agrega el botón para ir al carrito
+                    IconButton(onClick = onNavigateToCart) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Ver Carrito"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
