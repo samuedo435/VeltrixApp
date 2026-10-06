@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -45,7 +46,8 @@ import com.example.veltrixapp.viewmodel.CatalogViewModel
 fun CatalogScreen(
     catalogViewModel: CatalogViewModel,
     cartViewModel: CartViewModel,
-    onNavigateToCart: () -> Unit
+    onNavigateToCart: () -> Unit,
+    onOpenDrawer: () -> Unit
 ) {
     val productosLista by catalogViewModel.productos.collectAsState()
 
@@ -59,6 +61,14 @@ fun CatalogScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Catálogo Veltrix") },
+                navigationIcon = {
+                    IconButton(onClick = onOpenDrawer) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Abrir Menú"
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = onNavigateToCart) {
                         // Se agrega el componente BadgedBox para mostrar el número de productos

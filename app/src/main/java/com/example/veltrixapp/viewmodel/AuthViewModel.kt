@@ -45,6 +45,11 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
     fun resetState() {
         _authState.value = AuthState.Idle
     }
+
+    fun logout() {
+        sessionManager.clearSession()
+        resetState() // Regresa el estado a Idle
+    }
 }
 
 sealed class AuthState {

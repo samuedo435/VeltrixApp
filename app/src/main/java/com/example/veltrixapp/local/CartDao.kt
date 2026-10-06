@@ -20,4 +20,7 @@ interface CartDao {
 
     @Query("DELETE FROM cart_items")
     suspend fun vaciarCarrito()
+
+    @Query("DELETE FROM cart_items")
+    suspend fun clearCart()
 }

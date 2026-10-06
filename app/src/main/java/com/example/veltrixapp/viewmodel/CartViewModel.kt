@@ -6,14 +6,25 @@ import androidx.lifecycle.viewModelScope
 import com.example.veltrixapp.local.CartEntity
 import com.example.veltrixapp.repository.CartRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     private val _cartItems = MutableStateFlow<List<CartEntity>>(emptyList())
     val cartItems: StateFlow<List<CartEntity>> = _cartItems.asStateFlow()
+
+    val totalPrice: StateFlow<Double> = _cartItems.map { items ->
+        items.sumOf { it.precio * it.cantidad }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0.0
+    )
 
     init {
         loadCart()
@@ -25,7 +36,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         }
     }
 
-    fun addProduct(id: Long, nombre: String, precio: Double) {
+    fun addProduct(id: Int, nombre: String, precio: Double) {
         viewModelScope.launch {
             // Se verifica si ya está en el carrito para sumarle 1 a la cantidad
             val currentList = _cartItems.value
@@ -45,6 +56,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun removeProduct(item: CartEntity) {
         viewModelScope.launch {
             repository.removeFromCart(item)
+            loadCart()
+        }
+    }
+
+    fun clearCart() {
+        viewModelScope.launch {
+            repository.clearCart()
             loadCart()
         }
     }

@@ -1,7 +1,7 @@
 package com.example.veltrixapp.model
 
 data class Producto(
-    val id: Long,
+    val id: Int,
     val nombre: String,
     val descripcion: String,
     val precio: Double,

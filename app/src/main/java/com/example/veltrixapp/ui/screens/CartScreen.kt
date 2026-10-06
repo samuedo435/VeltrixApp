@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,9 +42,11 @@ import com.example.veltrixapp.viewmodel.CartViewModel
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToCheckout: () -> Unit
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
+    val total by cartViewModel.totalPrice.collectAsState()
     val context = LocalContext.current
 
     Scaffold(
@@ -55,6 +59,18 @@ fun CartScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            if (cartItems.isNotEmpty()) {
+                BottomAppBar(modifier = Modifier.padding(16.dp)) {
+                    Button(
+                        onClick = onNavigateToCheckout,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Ir al Checkout ($$total)")
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         // Se evalúa si la lista está vacía para mostrar el mensaje correspondiente

@@ -4,7 +4,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 
-// --- MODELOS DE DATOS ---
+// --- MODELOS DE DATOS Y REQUESTS ---
 data class RegisterRequest(
     val nombre: String,
     val apellido: String,
@@ -28,13 +28,35 @@ data class LoginResponse(
 )
 
 data class ProductoDTO(
-    val id: Long,
+    val id: Int,
     val nombre: String,
     val descripcion: String,
     val precio: Double,
     val stock: Int,
-    val categoriaId: Long?,
+    val categoriaId: Int?,
     val categoriaNombre: String?
+)
+
+data class AuthUserResponse(
+    val id: Long?,
+    val correo: String?,
+    val rol: String?
+)
+
+data class ItemCheckoutDTO(
+    val productoId: Long,
+    val cantidad: Int
+)
+
+data class CheckoutRequest(
+    val productos: List<ItemCheckoutDTO>,
+    val metodoPago: String = "EFECTIVO",
+    val direccionEnvio: String
+)
+
+data class CheckoutResponse(
+    val pedidoId: Long?,
+    val mensaje: String?
 )
 
 // --- INTERFAZ DE RETROFIT ---
@@ -46,6 +68,12 @@ interface VeltrixApiService {
     @POST("api/auth/register")
     suspend fun registrarUsuario(@Body request: RegisterRequest): RegisterResponse
 
-    @GET("/api/productos")
+    @GET("api/auth/me")
+    suspend fun obtenerUsuarioAutenticado(): AuthUserResponse
+
+    @GET("api/productos")
     suspend fun obtenerProductos(): List<ProductoDTO>
+
+    @POST("api/pedidos/checkout")
+    suspend fun procesarCheckout(@Body request: CheckoutRequest): CheckoutResponse
 }
