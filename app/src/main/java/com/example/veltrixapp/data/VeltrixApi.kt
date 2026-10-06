@@ -3,6 +3,8 @@ package com.example.veltrixapp.data
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 
 // --- MODELOS DE DATOS Y REQUESTS ---
 data class RegisterRequest(
@@ -87,6 +89,27 @@ data class ClienteDTO(
     val correo: String? = null
 )
 
+data class UsuarioRef(
+    val id: Long?
+)
+
+data class ClienteRequest(
+    val id: Long? = null,
+    val nombre: String,
+    val apellido: String,
+    val telefono: String,
+    val direccion: String,
+    val usuario: UsuarioRef? = null,
+    val usuarioId: Long? = null
+)
+
+data class UsuarioUpdateRequest(
+    val id: Long? = null,
+    val correo: String,
+    val password: String,
+    val rol: String = "CLIENTE"
+)
+
 // --- INTERFAZ DE RETROFIT ---
 interface VeltrixApiService {
 
@@ -113,4 +136,16 @@ interface VeltrixApiService {
 
     @GET("api/clientes")
     suspend fun obtenerClientes(): List<ClienteDTO>
+
+    @PUT("api/clientes/{id}")
+    suspend fun actualizarCliente(
+        @Path("id") id: Long,
+        @Body request: ClienteRequest
+    ): ClienteDTO
+
+    @PUT("api/usuarios/{id}")
+    suspend fun actualizarUsuario(
+        @Path("id") id: Long,
+        @Body request: UsuarioUpdateRequest
+    ): AuthUserResponse
 }

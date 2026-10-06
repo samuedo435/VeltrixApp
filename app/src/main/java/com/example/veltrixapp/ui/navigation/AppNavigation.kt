@@ -18,14 +18,17 @@ import com.example.veltrixapp.ui.screens.CatalogScreen
 import com.example.veltrixapp.ui.screens.CheckoutScreen
 import com.example.veltrixapp.ui.screens.LoginScreen
 import com.example.veltrixapp.ui.screens.OrdersScreen
+import com.example.veltrixapp.ui.screens.ProfileScreen
 import com.example.veltrixapp.ui.screens.RegisterScreen
 import com.example.veltrixapp.viewmodel.AuthViewModel
 import com.example.veltrixapp.viewmodel.CartViewModel
 import com.example.veltrixapp.viewmodel.CatalogViewModel
 import com.example.veltrixapp.viewmodel.CheckoutViewModel
 import com.example.veltrixapp.viewmodel.OrdersViewModel
+import com.example.veltrixapp.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel,
@@ -33,6 +36,7 @@ fun AppNavigation(
     cartViewModel: CartViewModel,
     checkoutViewModel: CheckoutViewModel,
     ordersViewModel: OrdersViewModel,
+    profileViewModel: ProfileViewModel,
     startDestination: String
 ) {
     val navController = rememberNavController()
@@ -119,6 +123,7 @@ fun AppNavigation(
             }
             composable("profile") {
                 ProfileScreen(
+                    profileViewModel = profileViewModel,
                     onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             }
@@ -128,30 +133,6 @@ fun AppNavigation(
                     onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProfileScreen(onOpenDrawer: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mi Perfil") },
-                navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menú")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Pantalla de Perfil de Usuario")
         }
     }
 }
