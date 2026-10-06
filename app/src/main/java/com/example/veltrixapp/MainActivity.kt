@@ -17,6 +17,7 @@ import com.example.veltrixapp.viewmodel.CartViewModel
 import com.example.veltrixapp.viewmodel.CartViewModelFactory
 import com.example.veltrixapp.viewmodel.CatalogViewModel
 import com.example.veltrixapp.viewmodel.CheckoutViewModel
+import com.example.veltrixapp.viewmodel.OrdersViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
         }.create(CheckoutViewModel::class.java)
 
         val catalogViewModel = CatalogViewModel()
+        val ordersViewModel = OrdersViewModel()
 
         setContent {
             VeltrixAppTheme {
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
                     catalogViewModel = catalogViewModel,
                     cartViewModel = cartViewModel,
                     checkoutViewModel = checkoutViewModel,
+                    ordersViewModel = ordersViewModel,
                     startDestination = startDestination
                 )
             }

@@ -17,11 +17,13 @@ import com.example.veltrixapp.ui.screens.CartScreen
 import com.example.veltrixapp.ui.screens.CatalogScreen
 import com.example.veltrixapp.ui.screens.CheckoutScreen
 import com.example.veltrixapp.ui.screens.LoginScreen
+import com.example.veltrixapp.ui.screens.OrdersScreen
 import com.example.veltrixapp.ui.screens.RegisterScreen
 import com.example.veltrixapp.viewmodel.AuthViewModel
 import com.example.veltrixapp.viewmodel.CartViewModel
 import com.example.veltrixapp.viewmodel.CatalogViewModel
 import com.example.veltrixapp.viewmodel.CheckoutViewModel
+import com.example.veltrixapp.viewmodel.OrdersViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -30,6 +32,7 @@ fun AppNavigation(
     catalogViewModel: CatalogViewModel,
     cartViewModel: CartViewModel,
     checkoutViewModel: CheckoutViewModel,
+    ordersViewModel: OrdersViewModel,
     startDestination: String
 ) {
     val navController = rememberNavController()
@@ -108,7 +111,7 @@ fun AppNavigation(
                     onNavigateBack = { navController.popBackStack() },
                     onOrderSuccess = {
                         cartViewModel.clearCart() // Vaciamos la BD local
-                        navController.navigate("catalog") { // Redirigimos al catálogo o pedidos
+                        navController.navigate("orders") { // Redirigimos a Mis Pedidos
                             popUpTo("catalog") { inclusive = false }
                         }
                     }
@@ -121,6 +124,7 @@ fun AppNavigation(
             }
             composable("orders") {
                 OrdersScreen(
+                    ordersViewModel = ordersViewModel,
                     onOpenDrawer = { scope.launch { drawerState.open() } }
                 )
             }
@@ -148,30 +152,6 @@ fun ProfileScreen(onOpenDrawer: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Text("Pantalla de Perfil de Usuario")
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun OrdersScreen(onOpenDrawer: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mis Pedidos") },
-                navigationIcon = {
-                    IconButton(onClick = onOpenDrawer) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menú")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Pantalla de Historial de Pedidos")
         }
     }
 }

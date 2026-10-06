@@ -59,6 +59,34 @@ data class CheckoutResponse(
     val mensaje: String?
 )
 
+data class PedidoDTO(
+    val id: Long = 0L,
+    val fechaPedido: String? = null,
+    val montoTotal: Double? = 0.0,
+    val estado: String? = null,
+    val clienteId: Long? = null,
+    val nombreCliente: String? = null
+)
+
+data class DetallePedidoDTO(
+    val id: Long = 0L,
+    val cantidad: Int? = 1,
+    val subtotal: Double? = 0.0,
+    val pedidoId: Long? = null,
+    val productoId: Long? = null,
+    val productoNombre: String? = null
+)
+
+data class ClienteDTO(
+    val id: Long? = null,
+    val nombre: String? = null,
+    val apellido: String? = null,
+    val telefono: String? = null,
+    val direccion: String? = null,
+    val usuarioId: Long? = null,
+    val correo: String? = null
+)
+
 // --- INTERFAZ DE RETROFIT ---
 interface VeltrixApiService {
 
@@ -76,4 +104,13 @@ interface VeltrixApiService {
 
     @POST("api/pedidos/checkout")
     suspend fun procesarCheckout(@Body request: CheckoutRequest): CheckoutResponse
+
+    @GET("api/pedidos")
+    suspend fun obtenerPedidos(): List<PedidoDTO>
+
+    @GET("api/detalles-pedido")
+    suspend fun obtenerDetallesPedido(): List<DetallePedidoDTO>
+
+    @GET("api/clientes")
+    suspend fun obtenerClientes(): List<ClienteDTO>
 }
