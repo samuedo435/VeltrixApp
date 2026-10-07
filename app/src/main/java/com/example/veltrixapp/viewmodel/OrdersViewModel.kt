@@ -62,17 +62,20 @@ class OrdersViewModel : ViewModel() {
                     throw Exception("Error ${e.code()} en el servidor al consultar pedidos: ${body ?: e.message()}")
                 }
 
-                // 4. Filtrar pedidos mapeando correctamente por clienteId (ej: clienteId == 7)
+                // 4. Filtrar pedidos estrictamente pertenecientes al cliente/usuario autenticado
                 val pedidosUsuario = when {
                     clienteActual?.id != null -> {
-                        val porClienteId = todosLosPedidos.filter { it.clienteId == clienteActual.id }
-                        if (porClienteId.isNotEmpty()) porClienteId else todosLosPedidos
+                        todosLosPedidos.filter { it.clienteId == clienteActual.id }
                     }
                     usuarioActual?.id != null -> {
-                        val porUsuarioId = todosLosPedidos.filter { it.clienteId == usuarioActual.id }
-                        if (porUsuarioId.isNotEmpty()) porUsuarioId else todosLosPedidos
+                        todosLosPedidos.filter { it.clienteId == usuarioActual.id }
                     }
-                    else -> todosLosPedidos
+                    !usuarioActual?.correo.isNullOrBlank() -> {
+                        todosLosPedidos.filter { pedido ->
+                            pedido.nombreCliente?.contains(usuarioActual.correo, ignoreCase = true) == true
+                        }
+                    }
+                    else -> emptyList() // Si no hay sesión válida, se retorna lista vacía de forma segura
                 }
 
                 // 5. Obtener detalles de pedidos
